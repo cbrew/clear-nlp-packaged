@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import pandas
 import sys
-sys.path.append('./gen-py')
- 
+sys.path.append('./target/generated-sources/python/gen-py')
+
 from sample import ClearNLP
 from sample.ttypes import *
 from sample.constants import *
- 
+
 from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
@@ -36,7 +36,7 @@ try:
             df = pandas.DataFrame(sentence, columns=('id', 'form', 'lemma', 'pos', 'pred', 'index', 'role', 'rm'))
             df['sentno'] = i
             print df
-        sentno += i+1
+        sentno += i + 1
 
     transport.close()
 

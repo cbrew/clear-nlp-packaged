@@ -33,9 +33,9 @@ try:
     for arg in sys.argv[1:]:
         print arg
         for i, sentence in enumerate(client.labelFile(arg)):
-            df = pandas.DataFrame(sentence, columns=('id', 'form', 'lemma', 'pos', 'pred', 'index', 'role', 'rm'))
-            df['sentno'] = i
-            print df
+            print i
+            for node in sentence:
+                print node
         sentno += i + 1
 
     transport.close()

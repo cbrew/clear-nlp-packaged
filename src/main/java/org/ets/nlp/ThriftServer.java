@@ -98,6 +98,7 @@ public class ThriftServer {
 		return r;
 	    }
 	    catch (Exception e) {
+		System.out.println(e);
 		return null;
 	    }
 	}

@@ -13,39 +13,61 @@ from thrift.protocol import TBinaryProtocol
 
 
 
-def dsplit(x):
+def dsplit(x,sentence):
     """
     Decode the semantic role relations.
     ; separates multiple relations
     : separates index from relation name
-    
     output is a set of index,relname pairs
     """
     if ";" in x:
-        return {dsplit(y).pop() for y in x.split(";")}
+        r = []
+        for y in x.split(";"):
+            r += dsplit(y,sentence)
+        return r
     try:
         (i,r) = x.split(":")
-        return {(int(i),r)}
+        targets = [x for x in sentence if x.id is i]
+        assert len(targets) == 1
+        
+        return [(r,targets[0])]
     except:
-        return frozenset()
+        return []
+
+
+
+
+
+def link_ids(sentence):
+    for node in sentence:
+        if node.headId is '_':
+            node.headId = None
+        else:
+            targets = [x for x in sentence if x.id is node.headId]
+            assert len(targets) == 1
+            node.headId = targets[0]
+        node.sheads = dsplit(node.sheads,sentence) 
+
+
+
+
+def generate_triples(sentence):
+    for x in sentence:
+        if x.headId:
+            yield ("syn",x.headId.lemma,x.deprel,x.lemma)
+        for l in x.sheads:
+            yield ("sem",l[1].lemma,l[0],x.lemma)
+
 
 def package_sentence(sentence):
-    srel=[dsplit(x.sheads) for x in sentence]
-    df = pandas.DataFrame(dict(
-            word=[x.word for x in sentence],
-            id =[x.id for x in sentence],
-            lemma=[x.lemma for x in sentence],
-            pos=[x.pos for x in sentence],
-            feats = [x.feats for x in sentence],
-            dephead=[x.headId for x in sentence],
-            deprel=[x.deprel for x in sentence],
-            srel = srel),
-            columns=['id','word','lemma','pos','feats','dephead','deprel','srel'])
-    return df
+    link_ids(sentence)
+    
+    return list(generate_triples(sentence))
+
 
 def package_sentences(result):
-    for sentence in result:
-        yield package_sentence(sentence)
+    return [package_sentence(sentence) for sentence in result]
+        
 
 
 
@@ -58,9 +80,11 @@ def featureize(text):
     """
     global client
     text = str(text)
-    result = client.labelString(text + ' . ')
-    for sentence in package_sentences(result):
-        yield sentence
+    if text[-1] not in (".","!","?"):
+        text += '.'
+    result = client.labelString(text)
+    return [sentence for sentence in package_sentences(result)]
+
 
 def oninit():
     global client
@@ -93,7 +117,10 @@ def onexit():
 
 
 
-
+if __name__ == "__main__":
+    oninit()
+    print featureize('The dog might get too cool to do that')
+    onexit()
 
 
 

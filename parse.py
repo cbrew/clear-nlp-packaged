@@ -86,19 +86,6 @@ def dep_string(x):
     return "%s:%s-%s-%s" % x
 
 
-def featureize_sentence(sentence):
-    link_ids(sentence)
-    return "\n".join(dep_string(x) for x in generate_triples(sentence))
-
-
-def package_sentences(result):
-    return [featureize_sentence(sentence) for sentence in result]
-        
-
-
-
-
-
 def featureize(text):
     """
     Yield the features associated with each 
@@ -109,10 +96,11 @@ def featureize(text):
     if text[-1] not in (".","!","?"):
         text += '.'
     logging.info(text)
-    result = client.labelString(text)
-
-
-    return "\n\n".join(featureize_sentence(x) for x in result)
+    for x in client.labelString(text):
+        link_ids(x)
+        for y in generate_triples(x):
+            yield dep_string(y)
+        yield " "
         
 
 
@@ -149,7 +137,8 @@ def onexit():
 
 if __name__ == "__main__":
     oninit()
-    print featureize('The dog might be too cool to do that. Which would annoy the owner')
+    for triple in featureize('The dog might be too cool to do that. Which would annoy the owner'):
+        print triple
     onexit()
 
 

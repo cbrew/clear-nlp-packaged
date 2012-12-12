@@ -1,6 +1,7 @@
-import pandas
 import sys
 sys.path.append('./target/generated-sources/python/gen-py')
+from collections import namedtuple
+import logging
 
 from sample import ClearNLP
 from sample.ttypes import *
@@ -27,8 +28,10 @@ def dsplit(x,sentence):
         return r
     try:
         (i,r) = x.split(":")
-        targets = [x for x in sentence if x.id is i]
-        assert len(targets) == 1
+        targets = [x for x in sentence if x.id == i]
+        if len(targets) != 1:
+            logging.info((targets,node.headId,[x.id for x in sentence]))
+            sys.exit(0)
         
         return [(r,targets[0])]
     except:
@@ -43,30 +46,53 @@ def link_ids(sentence):
         if node.headId is '_':
             node.headId = None
         else:
-            targets = [x for x in sentence if x.id is node.headId]
-            assert len(targets) == 1
+            targets = [x for x in sentence if x.id == node.headId]
+            if len(targets) != 1:
+                logging.info((targets,node.headId,[x.id for x in sentence]))
+                sys.exit(0)
             node.headId = targets[0]
         node.sheads = dsplit(node.sheads,sentence) 
 
+
+
+Dependency = namedtuple("Dependency",("deptype","head","relation","dependent"))
+class Token(namedtuple("Token",("word","lemma","pos"))):
+    __slots__ = ()
+    def __str__(self):
+        return "%s/%s" % (self.word,self.pos)
 
 
 
 def generate_triples(sentence):
     for x in sentence:
         if x.headId:
-            yield ("syn",x.headId.lemma,x.deprel,x.lemma)
+            yield Dependency(deptype="syn",
+                             head=Token(word= x.headId.word,
+                                        lemma=x.headId.lemma,
+                                        pos=x.headId.pos),
+                             relation=x.deprel,
+                             dependent=Token(word=x.word,lemma=x.lemma,pos=x.pos))
         for l in x.sheads:
-            yield ("sem",l[1].lemma,l[0],x.lemma)
+            yield Dependency(deptype="sem",
+                             head=Token(word=l[1].word,
+                                        lemma=l[1].lemma,
+                                        pos=l[1].pos),
+                                        relation=l[0],
+                             dependent=Token(word=x.word,lemma=x.lemma,pos=x.pos))
+                             
 
 
-def package_sentence(sentence):
+def dep_string(x):
+    return "%s:%s-%s-%s" % x
+
+
+def featureize_sentence(sentence):
     link_ids(sentence)
-    
-    return list(generate_triples(sentence))
+    return "\n".join(dep_string(x) for x in generate_triples(sentence))
 
 
 def package_sentences(result):
-    return [package_sentence(sentence) for sentence in result]
+    return [featureize_sentence(sentence) for sentence in result]
         
 
 
@@ -82,8 +108,12 @@ def featureize(text):
     text = str(text)
     if text[-1] not in (".","!","?"):
         text += '.'
+    logging.info(text)
     result = client.labelString(text)
-    return [sentence for sentence in package_sentences(result)]
+
+
+    return "\n\n".join(featureize_sentence(x) for x in result)
+        
 
 
 def oninit():
@@ -119,7 +149,7 @@ def onexit():
 
 if __name__ == "__main__":
     oninit()
-    print featureize('The dog might get too cool to do that')
+    print featureize('The dog might be too cool to do that. Which would annoy the owner')
     onexit()
 
 

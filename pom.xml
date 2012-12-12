@@ -45,7 +45,7 @@
                 <configuration>
                   <tasks>
                     <mkdir dir="target/generated-sources/python" />
-                    <exec executable="/home/research/cbrew/bin/thrift" >
+                    <exec executable="thrift" >
                       <arg value="--gen" />
                       <arg value="py"/>
                       <arg value="-o"/>
@@ -74,7 +74,7 @@
                 <artifactId>maven-thrift-plugin</artifactId>
                 <version>0.1.10</version>
                 <configuration>
-                    <thriftExecutable>/home/research/cbrew/bin/thrift</thriftExecutable>
+                    <thriftExecutable>thrift</thriftExecutable>
                 </configuration>
                 <executions>
                     <execution>

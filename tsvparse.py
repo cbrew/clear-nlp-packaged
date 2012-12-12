@@ -17,10 +17,11 @@ features.oninit()
 
 q = pandas.read_table(sys.argv[2])
 
-def control_length(text,limit=50000):
+def control_length(fgen,limit=50000):
     """
     Ensure text is not too long. 
     """
+    text = "\n".join(fgen)
     return text[:limit]
 
 

@@ -17,21 +17,20 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 
 
-import com.googlecode.clearnlp.dependency.AbstractDEPParser;
+
+import com.googlecode.clearnlp.component.AbstractComponent;
 import com.googlecode.clearnlp.dependency.DEPTree;
-import com.googlecode.clearnlp.dependency.DEPNode;
-import com.googlecode.clearnlp.dependency.srl.AbstractSRLabeler;
 import com.googlecode.clearnlp.engine.EngineGetter;
-import com.googlecode.clearnlp.engine.EngineProcess;
-import com.googlecode.clearnlp.morphology.AbstractMPAnalyzer;
-import com.googlecode.clearnlp.pos.POSTagger;
-import com.googlecode.clearnlp.predicate.AbstractPredIdentifier;
+import com.googlecode.clearnlp.nlp.NLPDecode;
+import com.googlecode.clearnlp.nlp.NLPLib;
 import com.googlecode.clearnlp.reader.AbstractReader;
 import com.googlecode.clearnlp.segmentation.AbstractSegmenter;
 import com.googlecode.clearnlp.tokenization.AbstractTokenizer;
 import com.googlecode.clearnlp.util.UTInput;
 import com.googlecode.clearnlp.util.UTOutput;
-import com.googlecode.clearnlp.util.pair.Pair;
+import com.googlecode.clearnlp.dependency.DEPNode;
+import com.googlecode.clearnlp.dependency.DEPTree;
+
 
 
 public class ThriftServer {
@@ -39,27 +38,33 @@ public class ThriftServer {
     public static class ClearNLPHandler implements ClearNLP.Iface {
 		
 	static private final String language = AbstractReader.LANG_EN;
-	static private AbstractMPAnalyzer analyzer;
-	static private Pair<POSTagger[],Double> taggers;
-	static private AbstractDEPParser parser;
-	static private AbstractPredIdentifier identifier;
-	static private AbstractSRLabeler labeler;
+
+
+
+	static private AbstractTokenizer tokenizer;
+    static private AbstractComponent tagger; 
+    static private AbstractComponent analyzer;
+    static private AbstractComponent parser;   
+    static private AbstractComponent identifier;  
+   	static private AbstractComponent classifier;  
+    static private AbstractComponent labeler;  
+    static private AbstractComponent[] components;
         
 
 	public ClearNLPHandler () {
 	    try {
-		analyzer = EngineGetter.getMPAnalyzer(language, 
-						      ThriftServer.class.getResourceAsStream("/dictionary-1.1.0.zip"));
-                taggers = EngineGetter.getPOSTaggers(
-						     ThriftServer.class.getResourceAsStream("/ontonotes-en-pos-1.1.0g.jar"));
-                parser = EngineGetter.getDEPParser(
-						   ThriftServer.class.getResourceAsStream("/ontonotes-en-dep-1.1.0b3.jar"));
-                identifier = EngineGetter.getPredIdentifier(
-							    ThriftServer.class.getResourceAsStream("/ontonotes-en-pred-1.2.0.jar"));
-                labeler = EngineGetter.getSRLabeler(
-						    ThriftServer.class.getResourceAsStream("/ontonotes-en-srl-1.2.0b3.jar"));
+
+	    	tokenizer  = EngineGetter.getTokenizer(language, ThriftServer.class.getResourceAsStream("/dictionary-1.2.0.zip"));
+	    	tagger    = EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-pos-1.3.0.jar") , language, NLPLib.MODE_POS);
+	    	analyzer =  EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/dictionary-1.2.0.zip") , language, NLPLib.MODE_MORPH);
+            parser =   EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-dep-1.3.0.jar") , language, NLPLib.MODE_DEP);
+            identifier =  EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-pred-1.3.0.jar") , language, NLPLib.MODE_PRED);
+            classifier = EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-pred-1.3.0.jar") , language, NLPLib.MODE_ROLE);
+            labeler = EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-srl-1.3.0.jar") , language, NLPLib.MODE_SRL);
+            AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, labeler};
+            components = comps;
 	    } catch (Exception e) {
-		
+			
 	    }
 	}
 
@@ -89,6 +94,10 @@ public class ThriftServer {
 
 	public List labelString(String inputString)
 	{
+
+
+
+
 
 	    try {
 		InputStream is = new ByteArrayInputStream(inputString.getBytes());
@@ -121,22 +130,35 @@ public class ThriftServer {
 	private List<List<TDepNode>> labelCommon(BufferedReader in)
 	{
 
-	    try {
-		List<List<TDepNode>> result = new ArrayList<List<TDepNode>>();
-    
-		AbstractTokenizer tokenizer = EngineGetter.getTokenizer(language, ThriftServer.class.getResourceAsStream("/dictionary-1.1.0.zip"));
-
 		AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
+        NLPDecode nlp = new NLPDecode();
+
+	    try {
+
+
+			List<List<TDepNode>> result = new ArrayList<List<TDepNode>>();
+
+
+
+    
+	
     
 		for (List<String> tokens : segmenter.getSentences(in)){    
-		    DEPTree tree = EngineProcess.getDEPTree(taggers, analyzer, parser, identifier, labeler, tokens);
+
+			DEPTree tree = nlp.toDEPTree(tokens);
+                        
+            // for (AbstractComponent component : components){
+            //        component.process(tree);
+		   // }
 		    result.add(wrap(tree));
+
 
 		}
 		in.close();
 		return result;
 	    } catch (Exception e) {
-		return null;
+	    	System.out.println(e);
+		 return null;
 	    }
 	}
     }

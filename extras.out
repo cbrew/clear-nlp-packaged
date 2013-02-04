@@ -1,0 +1,126 @@
+1	John	john	NNP	_	2	nsubj	2:A0
+2	expected	expect	VBD	pb=expect.01	0	root	_
+3	Benedict	benedict	NNP	_	5	nsubj	5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	ccomp	2:A1
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0
+2	persuaded	persuade	VBD	pb=persuade.01	0	root	_
+3	Benedict	benedict	NNP	_	2	dobj	2:A1;5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	xcomp	2:A2
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0
+2	expected	expect	VBD	pb=expect.01	0	root	_
+3	him	him	PRP	_	5	nsubj	5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	ccomp	2:A1
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0
+2	persuaded	persuade	VBD	pb=persuade.01	0	root	_
+3	him	him	PRP	_	2	dobj	2:A1;5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	xcomp	2:A2
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0
+2	persuaded	persuade	VBD	pb=persuade.01	0	root	_
+3	he	he	PRP	_	5	nsubj	5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	ccomp	2:A1
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0;5:A0
+2	promised	promise	VBD	pb=promise.01	0	root	_
+3	him	him	PRP	_	2	dobj	2:A1;5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	xcomp	2:A2
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0
+2	promised	promise	VBD	pb=promise.01	0	root	_
+3	he	he	PRP	_	5	nsubj	5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	ccomp	2:A2
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0
+2	forced	force	VBD	pb=force.01	0	root	_
+3	Benedict	benedict	NNP	_	2	dobj	2:A1;5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	xcomp	2:A2
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0;5:A0
+2	promised	promise	VBD	pb=promise.01	0	root	_
+3	Benedict	benedict	NNP	_	2	dobj	2:A1;5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	xcomp	2:A2
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0;5:A0
+2	promised	promise	VBD	pb=promise.01	0	root	_
+3	Benedict	benedict	NNP	_	2	dobj	2:A1;5:A0
+4	to	to	TO	_	5	aux	_
+5	leave	leave	VB	pb=leave.01	2	xcomp	2:A2
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A0
+2	asked	ask	VBD	pb=ask.02	0	root	_
+3	Benedict	benedict	NNP	_	2	dobj	2:A2;5:A1
+4	to	to	TO	_	5	aux	_
+5	stay	stay	VB	pb=stay.01	2	xcomp	2:A1
+6	longer	longer	RBR	_	5	advmod	5:AM-TMP
+7	in	in	IN	_	5	prep	5:A3
+8	the	the	DT	_	10	det	_
+9	Vatican	vatican	NNP	_	10	nn	_
+10	libraries	library	NNS	_	7	pobj	_
+11	.	.	.	_	2	punct	_
+
+1	Flying	fly	VBG	pb=fly.01	2	amod	_
+2	planes	plane	NNS	_	3	nsubj	1:A1;3:A1
+3	is	be	VBZ	pb=be.01	0	root	_
+4	dangerous	dangerous	JJ	_	3	acomp	3:A2
+5	.	.	.	_	3	punct	_
+
+1	Flying	flying	NN	_	2	nn	_
+2	planes	plane	NNS	_	3	nsubj	3:A1
+3	are	be	VBP	pb=be.01	0	root	_
+4	dangerous	dangerous	JJ	_	3	acomp	3:A2
+5	.	.	.	_	3	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A1
+2	is	be	VBZ	pb=be.01	0	root	_
+3	easy	easy	JJ	_	2	acomp	2:A2
+4	to	to	TO	_	5	aux	_
+5	please	please	VB	pb=please.01	3	xcomp	_
+6	.	.	.	_	2	punct	_
+
+1	John	john	NNP	_	2	nsubj	2:A1;5:A0
+2	is	be	VBZ	pb=be.01	0	root	_
+3	eager	eager	JJ	_	2	acomp	2:A2
+4	to	to	TO	_	5	aux	_
+5	please	please	VB	pb=please.01	3	xcomp	_
+6	.	.	.	_	2	punct	_
+
+1	Who	who	WP	_	2	nsubj	2:R-A0
+2	did	do	VBD	pb=do.02	0	root	_
+3	the	the	DT	_	4	det	_
+4	policeman	policeman	NN	_	5	nsubj	5:A0
+5	tell	tell	VB	pb=tell.01	2	ccomp	2:A1
+6	to	to	TO	_	7	aux	_
+7	stop	stop	VB	pb=stop.01	5	xcomp	5:A1
+8	?	?	.	_	2	punct	_
+
+1	Who	who	WP	_	2	nsubj	2:R-A0
+2	did	do	VBD	pb=do.02	0	root	_
+3	the	the	DT	_	4	det	_
+4	policeman	policeman	NN	_	5	nsubj	5:A1;7:A0
+5	fail	fail	VB	pb=fail.01	2	ccomp	2:A1
+6	to	to	TO	_	7	aux	_
+7	stop	stop	VB	pb=stop.01	5	xcomp	5:A2
+8	?	?	.	_	2	punct	_
+

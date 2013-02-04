@@ -1,5 +1,6 @@
 package org.ets.nlp;
 
+import java.lang.StringBuilder;
 import java.lang.Integer;
 import java.util.List;
 import java.util.ArrayList;
@@ -54,13 +55,25 @@ public class ThriftServer {
 	public ClearNLPHandler () {
 	    try {
 
-	    	tokenizer  = EngineGetter.getTokenizer(language, ThriftServer.class.getResourceAsStream("/dictionary-1.2.0.zip"));
-	    	tagger    = EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-pos-1.3.0.jar") , language, NLPLib.MODE_POS);
-	    	analyzer =  EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/dictionary-1.2.0.zip") , language, NLPLib.MODE_MORPH);
-            parser =   EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-dep-1.3.0.jar") , language, NLPLib.MODE_DEP);
-            identifier =  EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-pred-1.3.0.jar") , language, NLPLib.MODE_PRED);
-            classifier = EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-pred-1.3.0.jar") , language, NLPLib.MODE_ROLE);
-            labeler = EngineGetter.getComponent(ThriftServer.class.getResourceAsStream("/ontonotes-en-srl-1.3.0.jar") , language, NLPLib.MODE_SRL);
+
+
+	    	 InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.2.0.zip");
+             InputStream morphStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.2.0.zip");
+             InputStream posModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.3.0.jar"); 
+             InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.3.0.jar");
+             InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.3.0.jar");
+             InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.3.0.jar");
+             InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.3.0.jar");
+
+
+             tokenizer  = EngineGetter.getTokenizer(language, dictStream);
+             tagger     = EngineGetter.getComponent(posModelStream, language, NLPLib.MODE_POS);
+             analyzer   = EngineGetter.getComponent(morphStream, language, NLPLib.MODE_MORPH);
+             parser     = EngineGetter.getComponent(depModelStream, language, NLPLib.MODE_DEP);
+             identifier = EngineGetter.getComponent(predModelStream, language, NLPLib.MODE_PRED);
+             classifier = EngineGetter.getComponent(roleModelStream, language, NLPLib.MODE_ROLE);
+             labeler    = EngineGetter.getComponent(srlModelStream , language, NLPLib.MODE_SRL);
+
             AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, labeler};
             components = comps;
 	    } catch (Exception e) {
@@ -70,29 +83,23 @@ public class ThriftServer {
 
 
 
-	private List<TDepNode> wrap(List<DEPNode> tokens){
+	private  String wrap(List<DEPNode> tokens){
 
-	    ArrayList<TDepNode> result = new ArrayList<TDepNode> ();
+	    StringBuilder sb = new StringBuilder();
+
 	    for(DEPNode token: tokens){
-		String s =  token.toStringSRL();
-		String [] fields = s.split("[\t\n ]+");
-
-
-		TDepNode x = new TDepNode(fields[0],
-					  fields[1],
-					  fields[2],
-					  fields[3],
-					  fields[4],
-					  fields[5],
-					  fields[6],
-					  fields[7]);
-		result.add(x);
+			String s =  token.toStringSRL();
+			sb.append(s);
+			sb.append("\n");
 	    }
-	    return result;
+
+	    String s = sb.toString();
+	    System.out.println(s);
+	    return s;
 
 	}
 
-	public List labelString(String inputString)
+	public List<String> labelString(String inputString)
 	{
 
 
@@ -102,7 +109,7 @@ public class ThriftServer {
 	    try {
 		InputStream is = new ByteArrayInputStream(inputString.getBytes());
 		BufferedReader in = new BufferedReader(new InputStreamReader(is));
-		List r = labelCommon(in);
+		List<String> r = labelCommon(in);
 		in.close();
 		return r;
 	    }
@@ -112,12 +119,11 @@ public class ThriftServer {
 	    }
 	}
 
-	public List labelFile(String inputFile) {
+	public List<String> labelFile(String inputFile) {
 
 	    try {
 		BufferedReader in = UTInput.createBufferedFileReader(inputFile);
-
-		List r = labelCommon(in);
+		List<String> r = labelCommon(in);
 		in.close();
 		return r;
 	    } catch (Exception e) {
@@ -127,7 +133,7 @@ public class ThriftServer {
 
 
 
-	private List<List<TDepNode>> labelCommon(BufferedReader in)
+	private List<String> labelCommon(BufferedReader in)
 	{
 
 		AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
@@ -136,7 +142,7 @@ public class ThriftServer {
 	    try {
 
 
-			List<List<TDepNode>> result = new ArrayList<List<TDepNode>>();
+			List<String> result = new ArrayList<String>();
 
 
 
@@ -146,19 +152,18 @@ public class ThriftServer {
 		for (List<String> tokens : segmenter.getSentences(in)){    
 
 			DEPTree tree = nlp.toDEPTree(tokens);
+
+			for (AbstractComponent component : components)
+                                component.process(tree);
                         
-            // for (AbstractComponent component : components){
-            //        component.process(tree);
-		   // }
 		    result.add(wrap(tree));
 
 
 		}
-		in.close();
-		return result;
+			return result;
 	    } catch (Exception e) {
 	    	System.out.println(e);
-		 return null;
+		 	return null;	
 	    }
 	}
     }

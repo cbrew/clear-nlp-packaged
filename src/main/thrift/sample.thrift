@@ -25,8 +25,8 @@ typedef list<TDepNode> TDepTree
 
 service ClearNLP {
 
-list<TDepTree> labelString(1: string inString)
-list<TDepTree> labelFile(1: string inFile) 
+list<string> labelString(1: string inString)
+list<string> labelFile(1: string inFile) 
 
 
 }

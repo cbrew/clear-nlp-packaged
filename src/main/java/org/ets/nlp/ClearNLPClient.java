@@ -53,13 +53,10 @@ public class ClearNLPClient {
   private static void perform(ClearNLP.Client client) throws TException
   {
 
-    for (List<TDepNode> sentence : client.labelString("The man bit the dog , really ! And then jumped.")) {
-	for(TDepNode node: sentence) {
-	    System.out.println(node);
-	}
-	System.out.println();
+    for (String sentence : client.labelString("The man bit the dog , really ! And then jumped.")) {
+	    System.out.println(sentence);
+      System.out.println();  
 	
     }
-    
-  }
+  }  
 }

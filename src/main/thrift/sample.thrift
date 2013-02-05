@@ -1,7 +1,8 @@
 namespace java org.ets.nlp
 
 /**
- * the thrift representation of a single node
+ * the thrift representation of a single node, including
+ * all the information about a word.
  */
 
 struct TDepNode {
@@ -15,18 +16,10 @@ struct TDepNode {
        8: string sheads;
 }
 
-
-
 typedef list<TDepNode> TDepTree 
 
-
-
-
-
 service ClearNLP {
-
-list<string> labelString(1: string inString)
-list<string> labelFile(1: string inFile) 
-
-
+	list<string> labelStringRaw(1: string inString)
+	list<string> labelFile(1: string inFile) 
+	list<TDepTree> labelString(1: string inString)
 }

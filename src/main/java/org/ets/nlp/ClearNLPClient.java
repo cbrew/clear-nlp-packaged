@@ -53,7 +53,7 @@ public class ClearNLPClient {
   private static void perform(ClearNLP.Client client) throws TException
   {
 
-    for (String sentence : client.labelString("The man bit the dog , really ! And then jumped.")) {
+    for (String sentence : client.labelStringRaw("The man bit the dog , really ! And then jumped.")) {
 	    System.out.println(sentence);
       System.out.println();  
 	

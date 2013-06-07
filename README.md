@@ -24,14 +24,16 @@ target/uber-clearpak-0.0.2-SNAPSHOT.jar
 This contains the code, and all the statistical models necessary to run the
 server. That can be done easily by invoking:
 
-java -jar target/uber-clearpak-0.0.2-SNAPSHOT.jar
+java -Xmx3g -jar target/uber-clearpak-0.0.2-SNAPSHOT.jar
 
 I do this in a @code screen session. It takes a while to load models, then sets
-up a server waiting for calls from clients. Thrift handles the server client interaction nicely. Presumably it works across machines, since that is the point of Thrift, but I haven't explored that fully.
+up a server waiting for calls from clients. Thrift handles the server client interaction nicely. 
+Presumably it works across machines, since that is the point of Thrift, but I haven't explored that fully.
 
 
 Once the server is running, the following call can be made.
 
+```code
 $ python demo.py
 0       _R_     _R_     _R_     _       _       _       _
 1       Please  please  UH      _       4       intj    4:AM-DIS
@@ -49,5 +51,6 @@ $ python demo.py
 13      in      in      IN      _       12      prep    12:A2
 14      motion  motion  NN      _       13      pobj    _
 15      .       .       .       _       4       punct   _
+```
 
 There is also a client in the Java part of the code, and Thrift supports many other languages.

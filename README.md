@@ -19,16 +19,17 @@ The extra step, which is necessary because github now has size limits, is to inv
 
 $ ./get-models
 
-This script relies on wget, which downloads the models from Jinho Choi's bitbucket space. You will need to install wget if you don't already have it.
+This script relies on wget, which downloads the models from Jinho Choi's bitbucket space. You will need to install wget 
+if you don't already have it. Once the models download, you are ready to build and run the server. First, do:
 
 $ mvn package
 
-which downloads the dependencies and builds a jar file 
+which downloads the dependencies and builds a jar file :
 
 target/uber-clearpak-1.4.0-SNAPSHOT.jar
 
 This contains the code, and all the statistical models necessary to run the
-server. That can be done easily by invoking:
+server. Next, run the server by invoking:
 
 java -Xmx3g -jar target/uber-clearpak-1.4.0-SNAPSHOT.jar
 

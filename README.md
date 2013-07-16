@@ -13,18 +13,24 @@ The first step is to download and build the software. The software is kept, for 
 
 This version contains no ETS specific material, other than the use of org.ets.nlp as the Java package name.
 
-To build and run the server, you download from github, then call
+To build and run the server, you download from github, carry out an extra step to download the models, then build.
+
+The extra step, which is necessary because github now has size limits, is to invoke a script.
+
+$ ./get-models
+
+This script relies on wget, which downloads the models from Jinho Choi's bitbucket space. You will need to install wget if you don't already have it.
 
 $ mvn package
 
 which downloads the dependencies and builds a jar file 
 
-target/uber-clearpak-0.0.2-SNAPSHOT.jar
+target/uber-clearpak-1.4.0-SNAPSHOT.jar
 
 This contains the code, and all the statistical models necessary to run the
 server. That can be done easily by invoking:
 
-java -Xmx3g -jar target/uber-clearpak-0.0.2-SNAPSHOT.jar
+java -Xmx3g -jar target/uber-clearpak-1.4.0-SNAPSHOT.jar
 
 I do this in a screen session. It takes a while to load models, then sets
 up a server waiting for calls from clients. Thrift handles the server client interaction nicely. 

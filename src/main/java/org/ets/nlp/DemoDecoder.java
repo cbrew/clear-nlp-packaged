@@ -98,15 +98,15 @@ public class DemoDecoder
 
         public static void main(String[] args)
         {
-                InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.2.0.zip");
-                InputStream morphStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.2.0.zip");
-                InputStream posModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.3.0.jar"); 
-                InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.3.0.jar");
-                InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.3.0.jar");
-                InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.3.0.jar");
-                InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.3.0.jar");
-                String inputFile     = args[6];
-                String outputFile    = args[7];
+                InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
+                InputStream morphStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
+                InputStream posModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.4.0.tgz"); 
+                InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.4.0.tgz");
+                InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.4.0.tgz");
+                InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.4.0.tgz");
+                InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.0.tgz");
+                String inputFile     = args[0];
+                String outputFile    = args[1];
 
                 try
                 {

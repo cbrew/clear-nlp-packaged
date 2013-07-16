@@ -49,7 +49,6 @@ public class ThriftServer {
     static private AbstractComponent identifier;  
    	static private AbstractComponent classifier;  
     static private AbstractComponent labeler;  
-    static private AbstractComponent verbnet;
     static private AbstractComponent[] components;
         
 
@@ -58,14 +57,13 @@ public class ThriftServer {
 
 
 
-		InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.2.0.zip");
-		InputStream morphStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.2.0.zip");
-		InputStream posModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.3.0.jar"); 
-		InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.3.0.jar");
-		InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.3.0.jar");
-		InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.3.0.jar");
-		InputStream vnModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-sense-vn-1.3.1b.jar");
-		InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.3.0.jar");
+		InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
+		InputStream morphStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
+		InputStream posModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.4.0.tgz"); 
+		InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.4.0.tgz");
+		InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.4.0.tgz");
+		InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.4.0.tgz");
+		InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.0.tgz");
 
 
 		tokenizer  = EngineGetter.getTokenizer(language, dictStream);
@@ -74,10 +72,9 @@ public class ThriftServer {
 		parser     = EngineGetter.getComponent(depModelStream, language, NLPLib.MODE_DEP);
 		identifier = EngineGetter.getComponent(predModelStream, language, NLPLib.MODE_PRED);
 		classifier = EngineGetter.getComponent(roleModelStream, language, NLPLib.MODE_ROLE);
-		verbnet    = EngineGetter.getComponent(vnModelStream  , language, NLPLib.MODE_SENSE+"_vn");
 		labeler    = EngineGetter.getComponent(srlModelStream , language, NLPLib.MODE_SRL);
 
-		AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, verbnet, labeler};
+		AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, labeler};
 		components = comps;
 	    } catch (Exception e) {
 		System.out.println(e);

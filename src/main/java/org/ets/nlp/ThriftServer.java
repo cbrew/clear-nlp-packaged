@@ -61,7 +61,7 @@ public class ThriftServer {
 		InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.4.0.tgz");
 		InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.4.0.tgz");
 		InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.4.0.tgz");
-		InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.0.tgz");
+		InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.2.tgz");
 
 		tokenizer  = EngineGetter.getTokenizer(language, dictStream);
 		tagger     = EngineGetter.getComponent(posModelStream, language, NLPLib.MODE_POS);

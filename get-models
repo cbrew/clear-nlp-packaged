@@ -5,5 +5,5 @@ wget https://bitbucket.org/jdchoi77/models/downloads/ontonotes-en-pos-1.4.0.tgz
 wget https://bitbucket.org/jdchoi77/models/downloads/ontonotes-en-dep-1.4.0.tgz
 wget https://bitbucket.org/jdchoi77/models/downloads/ontonotes-en-pred-1.4.0.tgz
 wget https://bitbucket.org/jdchoi77/models/downloads/ontonotes-en-role-1.4.0.tgz
-wget https://bitbucket.org/jdchoi77/models/downloads/ontonotes-en-srl-1.4.0.tgz
+wget https://bitbucket.org/jdchoi77/models/downloads/ontonotes-en-srl-1.4.2.tgz
 mv *.tgz src/main/resources

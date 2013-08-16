@@ -5,11 +5,11 @@ A packaged client and server for Clear NLP 1.3.1. This software defines an inter
 
 The software uses the Thrift framework to define and use a service that offers labeling for strings and files. The NLP functionality is from Jinho D. Choi's Clear NLP, which is Apache licensed and available on 
 
-@url https://code.google.com/p/clearnlp/
+https://code.google.com/p/clearnlp/
 
 The first step is to download and build the software. The software is kept, for now, at 
 
-@url https://github.com/cbrew/clear-nlp-packaged
+https://github.com/cbrew/clear-nlp-packaged
 
 This version contains no ETS specific material, other than the use of org.ets.nlp as the Java package name.
 
@@ -17,21 +17,21 @@ To build and run the server, you download from github, carry out an extra step t
 
 The extra step, which is necessary because github now has size limits, is to invoke a script.
 
-$ ./get-models
+	./get-models
 
 This script relies on wget, which downloads the models from Jinho Choi's bitbucket space. You will need to install wget 
 if you don't already have it. Once the models download, you are ready to build and run the server. First, do:
 
-$ mvn package
+	mvn package
 
 which downloads the dependencies and builds a jar file :
 
-target/uber-clearpak-1.4.0-SNAPSHOT.jar
+	target/uber-clearpak-1.4.0-SNAPSHOT.jar
 
 This contains the code, and all the statistical models necessary to run the
 server. Next, run the server by invoking:
 
-java -Xmx3g -jar target/uber-clearpak-1.4.0-SNAPSHOT.jar
+	java -Xmx3g -jar target/uber-clearpak-1.4.0-SNAPSHOT.jar
 
 I do this in a screen session. It takes a while to load models, then sets
 up a server waiting for calls from clients. Thrift handles the server client interaction nicely. 
@@ -42,7 +42,7 @@ has similar code for a large number of different parsers.
 Once the server is running, the following call can be made.
 
 ```code
-cbrew$ python demo.py
+$ python demo.py
 0  _R_	_R_	_R_	_	_	_	_
 1	Please	please	UH	_	4	intj	4:AM-DIS
 2	do	do	VB	p2=VBP	4	aux	_

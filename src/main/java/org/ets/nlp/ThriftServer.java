@@ -17,8 +17,6 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 
-
-
 import com.googlecode.clearnlp.component.AbstractComponent;
 import com.googlecode.clearnlp.dependency.DEPTree;
 import com.googlecode.clearnlp.engine.EngineGetter;
@@ -33,38 +31,37 @@ import com.googlecode.clearnlp.dependency.DEPNode;
 import com.googlecode.clearnlp.dependency.DEPTree;
 
 
+// New imports introduced by Diane :)
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.transport.TServerTransport;
+
 
 public class ThriftServer {
-	
+    
     public static class ClearNLPHandler implements ClearNLP.Iface {
-		
+	
 	static private final String language = AbstractReader.LANG_EN;
-
-
-
+		
 	static private AbstractTokenizer tokenizer;
-    static private AbstractComponent tagger; 
-    static private AbstractComponent analyzer;
-    static private AbstractComponent parser;   
-    static private AbstractComponent identifier;  
+	static private AbstractComponent tagger; 
+	static private AbstractComponent analyzer;
+	static private AbstractComponent parser;   
+	static private AbstractComponent identifier;  
    	static private AbstractComponent classifier;  
-    static private AbstractComponent labeler;  
-    static private AbstractComponent[] components;
-        
+	static private AbstractComponent labeler;  
+	static private AbstractComponent[] components;
 
 	public ClearNLPHandler () {
 	    try {
-
-
-
 		InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
-		InputStream morphStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
-		InputStream posModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.4.0.tgz"); 
+		InputStream morphStream     = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
+		InputStream posModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.4.0.tgz"); 
 		InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.4.0.tgz");
 		InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.4.0.tgz");
 		InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.4.0.tgz");
 		InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.0.tgz");
-
 
 		tokenizer  = EngineGetter.getTokenizer(language, dictStream);
 		tagger     = EngineGetter.getComponent(posModelStream, language, NLPLib.MODE_POS);
@@ -81,9 +78,7 @@ public class ThriftServer {
 	    }
 	}
 
-
-
-	private  String wrap(List<DEPNode> tokens){
+	private String wrap(List<DEPNode> tokens){
 
 	    StringBuilder sb = new StringBuilder();
 
@@ -95,13 +90,11 @@ public class ThriftServer {
 
 	    String s = sb.toString();
 	    return s;
-
 	}
 
 
+	public List<String> labelStringRaw(String inputString){
 
-	public List<String> labelStringRaw(String inputString)
-	{
 	    try {
 		InputStream is = new ByteArrayInputStream(inputString.getBytes());
 		BufferedReader in = new BufferedReader(new InputStreamReader(is));
@@ -133,15 +126,12 @@ public class ThriftServer {
 					  fields[6],
 					  fields[7]);
 		result.add(x);
-
 	    }
-
 	    return result;
 	}
 
+	public List<List<TDepNode>> labelString(String inputString){
 
-	public List<List<TDepNode> > labelString(String inputString)
-	{
 	    try {
 		InputStream is = new ByteArrayInputStream(inputString.getBytes());
 		BufferedReader in = new BufferedReader(new InputStreamReader(is));
@@ -167,10 +157,6 @@ public class ThriftServer {
 	    
 	}
 
-
-	
-
-
 	public List<String> labelFile(String inputFile) {
 
 	    try {
@@ -185,31 +171,29 @@ public class ThriftServer {
 
 
 
-	private List<String> labelCommon(BufferedReader in)
-	{
-
-		AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
-		NLPDecode nlp = new NLPDecode();
-
-		try {
-		    List<String> result = new ArrayList<String>();
-		    for (List<String> tokens : segmenter.getSentences(in)){    
-			DEPTree tree = nlp.toDEPTree(tokens);
-			for (AbstractComponent component : components)
-                                component.process(tree);
-			result.add(wrap(tree));
-		    }
-		    return result;
-		} catch (Exception e) {
-		    System.out.println(e);
-		    return null;	
+	private List<String> labelCommon(BufferedReader in){
+	    
+	    AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
+	    NLPDecode nlp = new NLPDecode();
+	    
+	    try {
+		List<String> result = new ArrayList<String>();
+		for (List<String> tokens : segmenter.getSentences(in)){    
+		    DEPTree tree = nlp.toDEPTree(tokens);
+		    for (AbstractComponent component : components)
+			component.process(tree);
+		    result.add(wrap(tree));
 		}
+		return result;
+	    } catch (Exception e) {
+		System.out.println(e);
+		return null;	
+	    }
 	}
     }
 
+    
     public static ClearNLPHandler handler;
-
-
     public static ClearNLP.Processor<ClearNLP.Iface> processor;
 	
     public static void main(String [] args) {
@@ -217,12 +201,13 @@ public class ThriftServer {
 	    handler = new ClearNLPHandler();
 	    processor = new ClearNLP.Processor<ClearNLP.Iface>(handler);
 	    
-	    Runnable simple = new Runnable() {
+	    Runnable start = new Runnable() {
 		    public void run() {
-			simple(processor);
+			//simple(processor);
+			tThreadPoolServer(processor);
 		    }
 		};      
-	    new Thread(simple).start();
+	    new Thread(start).start();
 	} catch (Exception x) {
 	    x.printStackTrace();
 	}
@@ -232,10 +217,6 @@ public class ThriftServer {
 	try {
 	    TServerTransport serverTransport = new TServerSocket(9090);
 	    TServer server = new TSimpleServer(new Args(serverTransport).processor(processor));
-
-	    // Use this for a multithreaded server
-	    // TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
-	    
 	    System.out.println("Starting the simple server...");
 	    server.serve();
 	} catch (Exception e) {
@@ -243,5 +224,21 @@ public class ThriftServer {
 	}
     }
 
+    public static void tThreadPoolServer(ClearNLP.Processor<ClearNLP.Iface> processor) {
+	int THREAD_POOL_SIZE = 10;
+
+	try {
+	    TServerTransport serverTransport = new TServerSocket(9090);
+	    TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverTransport);
+	    args.maxWorkerThreads(THREAD_POOL_SIZE);
+	    args.processor(processor);
+	    args.executorService(new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE));
+	    TServer server = new TThreadPoolServer(args);
+	    System.out.println("Starting the TThreadPoolServer...");
+	    server.serve();
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+    }
 }
 

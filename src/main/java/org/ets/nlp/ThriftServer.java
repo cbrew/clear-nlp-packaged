@@ -29,6 +29,8 @@ import com.googlecode.clearnlp.util.UTInput;
 import com.googlecode.clearnlp.util.UTOutput;
 import com.googlecode.clearnlp.dependency.DEPNode;
 import com.googlecode.clearnlp.dependency.DEPTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 // New imports introduced by Diane :)
@@ -39,7 +41,8 @@ import org.apache.thrift.transport.TServerTransport;
 
 
 public class ThriftServer {
-
+	private static Logger logger = LoggerFactory.getLogger(ThriftServer.class);
+	
 	public static class ClearNLPHandler implements ClearNLP.Iface {
 
 		static private final String language = AbstractReader.LANG_EN;
@@ -52,6 +55,7 @@ public class ThriftServer {
 		static private AbstractComponent classifier;  
 		static private AbstractComponent labeler;  
 		static private AbstractComponent[] components;
+		static private Logger logger = LoggerFactory.getLogger(ThriftServer.class);
 
 		public ClearNLPHandler () {
 			try {
@@ -74,7 +78,7 @@ public class ThriftServer {
 				AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, labeler};
 				components = comps;
 			} catch (Exception e) {
-				System.out.println(e);
+				logger.warn(e.toString());
 			}
 		}
 
@@ -102,7 +106,7 @@ public class ThriftServer {
 				in.close();
 				return r;
 			} catch (Exception e) {
-				System.out.println(e);
+				logger.warn(e.toString());
 				return null;
 			}
 		}
@@ -147,11 +151,11 @@ public class ThriftServer {
 					}
 					return result;
 				} catch (Exception e) {
-					System.out.println(e);
+					logger.warn(e.toString());
 					return null;	
 				}
 			} catch (Exception e) {
-				System.out.println(e);
+				logger.warn(e.toString());
 				return null;
 			}
 
@@ -165,6 +169,7 @@ public class ThriftServer {
 				in.close();
 				return r;
 			} catch (Exception e) {
+				logger.warn(e.toString());
 				return null;
 			}
 		}
@@ -186,7 +191,7 @@ public class ThriftServer {
 				}
 				return result;
 			} catch (Exception e) {
-				System.out.println(e);
+				logger.warn(e.toString());
 				return null;	
 			}
 		}
@@ -208,8 +213,8 @@ public class ThriftServer {
 				}
 			};      
 			new Thread(start).start();
-		} catch (Exception x) {
-			x.printStackTrace();
+		} catch (Exception e) {
+			logger.warn(e.toString());
 		}
 	}
 
@@ -220,12 +225,12 @@ public class ThriftServer {
 			System.out.println("Starting the simple server...");
 			server.serve();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.toString());
 		}
 	}
 
 	public static void tThreadPoolServer(ClearNLP.Processor<ClearNLP.Iface> processor) {
-		int THREAD_POOL_SIZE = 10;
+		int THREAD_POOL_SIZE = 1;
 
 		try {
 			TServerTransport serverTransport = new TServerSocket(9090);
@@ -237,7 +242,7 @@ public class ThriftServer {
 			System.out.println("Starting the TThreadPoolServer...");
 			server.serve();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(e.toString());
 		}
 	}
 }

@@ -222,7 +222,7 @@ public class ThriftServer {
 		try {
 			TServerTransport serverTransport = new TServerSocket(9090);
 			TServer server = new TSimpleServer(new Args(serverTransport).processor(processor));
-			System.out.println("Starting the simple server...");
+			logger.info("Starting the simple server...");
 			server.serve();
 		} catch (Exception e) {
 			logger.warn(e.toString());
@@ -239,7 +239,7 @@ public class ThriftServer {
 			args.processor(processor);
 			args.executorService(new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE));
 			TServer server = new TThreadPoolServer(args);
-			System.out.println("Starting the TThreadPoolServer...");
+			logger.info("Starting the TThreadPoolServer...");
 			server.serve();
 		} catch (Exception e) {
 			logger.warn(e.toString());

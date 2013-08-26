@@ -145,19 +145,16 @@ public class ThriftServer {
 				BufferedReader in = new BufferedReader(new InputStreamReader(is));
 				AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
 				NLPDecode nlp = new NLPDecode();        
-				try {
-					List<List<TDepNode> > result = new ArrayList< List<TDepNode> >(); 
-					for (List<String> tokens : segmenter.getSentences(in)){    
-						DEPTree tree = nlp.toDEPTree(tokens);
-						for (AbstractComponent component : components)
-							component.process(tree);
-						result.add(wrap2(tree));
-					}
-					return result;
-				} catch (Exception e) {
-					logger.warn(e.toString());
-					return null;    
+
+				List<List<TDepNode> > result = new ArrayList< List<TDepNode> >(); 
+				for (List<String> tokens : segmenter.getSentences(in)){    
+					DEPTree tree = nlp.toDEPTree(tokens);
+					for (AbstractComponent component : components)
+						component.process(tree);
+					result.add(wrap2(tree));
 				}
+				return result;
+			
 			} catch (Exception e) {
 				logger.warn(e.toString());
 				return null;
@@ -189,8 +186,9 @@ public class ThriftServer {
 				List<String> result = new ArrayList<String>();
 				for (List<String> tokens : segmenter.getSentences(in)){    
 					DEPTree tree = nlp.toDEPTree(tokens);
-					for (AbstractComponent component : components)
+					for (AbstractComponent component : components) {
 						component.process(tree);
+					}
 					result.add(wrap(tree));
 				}
 				return result;

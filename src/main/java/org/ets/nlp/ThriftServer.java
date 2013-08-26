@@ -41,209 +41,213 @@ import org.apache.thrift.transport.TServerTransport;
 
 
 public class ThriftServer {
-	private static Logger logger = LoggerFactory.getLogger(ThriftServer.class);
+    private static Logger logger = LoggerFactory.getLogger(ThriftServer.class);
+    
+    public static class ClearNLPHandler implements ClearNLP.Iface {
 	
-	public static class ClearNLPHandler implements ClearNLP.Iface {
-
-		static private final String language = AbstractReader.LANG_EN;
-
-		static private AbstractTokenizer tokenizer;
-		static private AbstractComponent tagger; 
-		static private AbstractComponent analyzer;
-		static private AbstractComponent parser;   
-		static private AbstractComponent identifier;  
-		static private AbstractComponent classifier;  
-		static private AbstractComponent labeler;  
-		static private AbstractComponent[] components;
-		static private Logger logger = LoggerFactory.getLogger(ThriftServer.class);
-
-		public ClearNLPHandler () {
-			try {
-				InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
-				InputStream morphStream     = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
-				InputStream posModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.4.0.tgz"); 
-				InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.4.0.tgz");
-				InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.4.0.tgz");
-				InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.4.0.tgz");
-				InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.2.tgz");
-
-				tokenizer  = EngineGetter.getTokenizer(language, dictStream);
-				tagger     = EngineGetter.getComponent(posModelStream, language, NLPLib.MODE_POS);
-				analyzer   = EngineGetter.getComponent(morphStream, language, NLPLib.MODE_MORPH);
-				parser     = EngineGetter.getComponent(depModelStream, language, NLPLib.MODE_DEP);
-				identifier = EngineGetter.getComponent(predModelStream, language, NLPLib.MODE_PRED);
-				classifier = EngineGetter.getComponent(roleModelStream, language, NLPLib.MODE_ROLE);
-				labeler    = EngineGetter.getComponent(srlModelStream , language, NLPLib.MODE_SRL);
-
-				AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, labeler};
-				components = comps;
-			} catch (Exception e) {
-				logger.warn(e.toString());
-			}
-		}
-
-		private String wrap(List<DEPNode> tokens){
-
-			StringBuilder sb = new StringBuilder();
-
-			for(DEPNode token: tokens){
-				String s =  token.toStringSRL();
-				sb.append(s);
-				sb.append("\n");
-			}
-
-			String s = sb.toString();
-			return s;
-		}
-
-
-		public List<String> labelStringRaw(String inputString){
-
-			try {
-				InputStream is = new ByteArrayInputStream(inputString.getBytes());
-				BufferedReader in = new BufferedReader(new InputStreamReader(is));
-				List<String> r = labelCommon(in);
-				in.close();
+	static private final String language = AbstractReader.LANG_EN;
+	
+	static private AbstractTokenizer tokenizer;
+	static private AbstractComponent tagger; 
+	static private AbstractComponent analyzer;
+	static private AbstractComponent parser;   
+	static private AbstractComponent identifier;  
+	static private AbstractComponent classifier;  
+	static private AbstractComponent labeler;  
+	static private AbstractComponent[] components;
+	static private Logger logger = LoggerFactory.getLogger(ThriftServer.class);
+	
+	public ClearNLPHandler () {
+	    try {
+		InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
+		InputStream morphStream     = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
+		InputStream posModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.4.0.tgz"); 
+		InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.4.0.tgz");
+		InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.4.0.tgz");
+		InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.4.0.tgz");
+		InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.2.tgz");
+		
+		tokenizer  = EngineGetter.getTokenizer(language, dictStream);
+		tagger     = EngineGetter.getComponent(posModelStream, language, NLPLib.MODE_POS);
+		analyzer   = EngineGetter.getComponent(morphStream, language, NLPLib.MODE_MORPH);
+		parser     = EngineGetter.getComponent(depModelStream, language, NLPLib.MODE_DEP);
+		identifier = EngineGetter.getComponent(predModelStream, language, NLPLib.MODE_PRED);
+		classifier = EngineGetter.getComponent(roleModelStream, language, NLPLib.MODE_ROLE);
+		labeler    = EngineGetter.getComponent(srlModelStream , language, NLPLib.MODE_SRL);
+		
+		AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, labeler};
+		components = comps;
+	    } catch (Exception e) {
+		//java.io.StringWriter sw = new java.io.StringWriter();
+		//java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+		//e.printStackTrace(pw);
+		//logger.warn(sw.getBuffer().toString());
+		logger.warn(e.toString());
+	    }
+	}
+	
+	private String wrap(List<DEPNode> tokens){
+	    
+	    StringBuilder sb = new StringBuilder();
+	    
+	    for(DEPNode token: tokens){
+		String s =  token.toStringSRL();
+		sb.append(s);
+		sb.append("\n");
+	    }
+	    
+	    String s = sb.toString();
+	    return s;
+	}
+	
+	
+	public List<String> labelStringRaw(String inputString){
+	    
+	    try {
+		InputStream is = new ByteArrayInputStream(inputString.getBytes());
+		BufferedReader in = new BufferedReader(new InputStreamReader(is));
+		List<String> r = labelCommon(in);
+		in.close();
 				return r;
-			} catch (Exception e) {
-				logger.warn(e.toString());
-				return null;
-			}
-		}
-
-
-		private List<TDepNode> wrap2(List<DEPNode> tokens) {
-			/**
-			 * 
-			 */
-			ArrayList<TDepNode> result = new ArrayList<TDepNode> ();
+	    } catch (Exception e) {
+		logger.warn(e.toString());
+		return null;
+	    }
+	}
+	
+	
+	private List<TDepNode> wrap2(List<DEPNode> tokens) {
+	    /**
+	     * 
+	     */
+	    ArrayList<TDepNode> result = new ArrayList<TDepNode> ();
 			for(DEPNode token: tokens){
-				String s =  token.toStringSRL();
-				String [] fields = s.split("[\t\n ]+");
-				assert fields.length == 8;
-				TDepNode x = new TDepNode(fields[0],
-						fields[1],
-						fields[2],
-						fields[3],
-						fields[4],
-						fields[5],
-						fields[6],
+			    String s =  token.toStringSRL();
+			    String [] fields = s.split("[\t\n ]+");
+			    assert fields.length == 8;
+			    TDepNode x = new TDepNode(fields[0],
+						      fields[1],
+						      fields[2],
+						      fields[3],
+						      fields[4],
+						      fields[5],
+						      fields[6],
 						fields[7]);
-				result.add(x);
+			    result.add(x);
 			}
 			return result;
-		}
-
-		public List<List<TDepNode>> labelString(String inputString){
-
-			try {
-				InputStream is = new ByteArrayInputStream(inputString.getBytes());
-				BufferedReader in = new BufferedReader(new InputStreamReader(is));
-				AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
-				NLPDecode nlp = new NLPDecode();		
-				try {
-					List<List<TDepNode> > result = new ArrayList< List<TDepNode> >(); 
-					for (List<String> tokens : segmenter.getSentences(in)){    
-						DEPTree tree = nlp.toDEPTree(tokens);
-						for (AbstractComponent component : components)
-							component.process(tree);
-						result.add(wrap2(tree));
-					}
-					return result;
-				} catch (Exception e) {
-					logger.warn(e.toString());
-					return null;	
-				}
-			} catch (Exception e) {
-				logger.warn(e.toString());
-				return null;
-			}
-
-		}
-
-		public List<String> labelFile(String inputFile) {
-
-			try {
-				BufferedReader in = UTInput.createBufferedFileReader(inputFile);
-				List<String> r = labelCommon(in);
-				in.close();
-				return r;
-			} catch (Exception e) {
-				logger.warn(e.toString());
-				return null;
-			}
-		}
-
-
-
-		private List<String> labelCommon(BufferedReader in){
-
-			AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
-			NLPDecode nlp = new NLPDecode();
-
-			try {
-				List<String> result = new ArrayList<String>();
-				for (List<String> tokens : segmenter.getSentences(in)){    
-					DEPTree tree = nlp.toDEPTree(tokens);
-					for (AbstractComponent component : components)
-						component.process(tree);
-					result.add(wrap(tree));
-				}
-				return result;
-			} catch (Exception e) {
-				logger.warn(e.toString());
-				return null;	
-			}
-		}
 	}
-
-
-	public static ClearNLPHandler handler;
-	public static ClearNLP.Processor<ClearNLP.Iface> processor;
-
-	public static void main(String [] args) {
+	
+	public List<List<TDepNode>> labelString(String inputString){
+	    
+	    try {
+		InputStream is = new ByteArrayInputStream(inputString.getBytes());
+		BufferedReader in = new BufferedReader(new InputStreamReader(is));
+		AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
+		NLPDecode nlp = new NLPDecode();		
 		try {
-			handler = new ClearNLPHandler();
-			processor = new ClearNLP.Processor<ClearNLP.Iface>(handler);
-
-			Runnable start = new Runnable() {
-				public void run() {
-					//simple(processor);
-					tThreadPoolServer(processor);
-				}
-			};      
-			new Thread(start).start();
+		    List<List<TDepNode> > result = new ArrayList< List<TDepNode> >(); 
+		    for (List<String> tokens : segmenter.getSentences(in)){    
+			DEPTree tree = nlp.toDEPTree(tokens);
+			for (AbstractComponent component : components)
+			    component.process(tree);
+			result.add(wrap2(tree));
+		    }
+		    return result;
 		} catch (Exception e) {
-			logger.warn(e.toString());
+		    logger.warn(e.toString());
+		    return null;	
 		}
+	    } catch (Exception e) {
+		logger.warn(e.toString());
+		return null;
+	    }
+	    
 	}
-
-	public static void simple(ClearNLP.Processor<ClearNLP.Iface> processor) {
-		try {
-			TServerTransport serverTransport = new TServerSocket(9090);
-			TServer server = new TSimpleServer(new Args(serverTransport).processor(processor));
-			logger.info("Starting the simple server...");
-			server.serve();
-		} catch (Exception e) {
-			logger.warn(e.toString());
+	
+	public List<String> labelFile(String inputFile) {
+	    
+	    try {
+		BufferedReader in = UTInput.createBufferedFileReader(inputFile);
+		List<String> r = labelCommon(in);
+		in.close();
+		return r;
+	    } catch (Exception e) {
+		logger.warn(e.toString());
+		return null;
+	    }
+	}
+	
+	
+	
+	private List<String> labelCommon(BufferedReader in){
+	    
+	    AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
+	    NLPDecode nlp = new NLPDecode();
+	    
+	    try {
+		List<String> result = new ArrayList<String>();
+		for (List<String> tokens : segmenter.getSentences(in)){    
+		    DEPTree tree = nlp.toDEPTree(tokens);
+		    for (AbstractComponent component : components)
+			component.process(tree);
+		    result.add(wrap(tree));
 		}
+		return result;
+	    } catch (Exception e) {
+		logger.warn(e.toString());
+		return null;	
+	    }
 	}
-
-	public static void tThreadPoolServer(ClearNLP.Processor<ClearNLP.Iface> processor) {
-		int THREAD_POOL_SIZE = 1;
-
-		try {
-			TServerTransport serverTransport = new TServerSocket(9090);
-			TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverTransport);
-			args.maxWorkerThreads(THREAD_POOL_SIZE);
-			args.processor(processor);
-			args.executorService(new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE));
-			TServer server = new TThreadPoolServer(args);
-			logger.info("Starting the TThreadPoolServer...");
-			server.serve();
-		} catch (Exception e) {
-			logger.warn(e.toString());
-		}
+    }
+    
+    
+    public static ClearNLPHandler handler;
+    public static ClearNLP.Processor<ClearNLP.Iface> processor;
+    
+    public static void main(String [] args) {
+	try {
+	    handler = new ClearNLPHandler();
+	    processor = new ClearNLP.Processor<ClearNLP.Iface>(handler);
+	    
+	    Runnable start = new Runnable() {
+		    public void run() {
+			//simple(processor);
+			tThreadPoolServer(processor);
+		    }
+		};      
+	    new Thread(start).start();
+	} catch (Exception e) {
+	    logger.warn(e.toString());
 	}
+    }
+    
+    public static void simple(ClearNLP.Processor<ClearNLP.Iface> processor) {
+	try {
+	    TServerTransport serverTransport = new TServerSocket(9090);
+	    TServer server = new TSimpleServer(new Args(serverTransport).processor(processor));
+	    logger.info("Starting the simple server...");
+	    server.serve();
+	} catch (Exception e) {
+	    logger.warn(e.toString());
+	}
+    }
+    
+    public static void tThreadPoolServer(ClearNLP.Processor<ClearNLP.Iface> processor) {
+	int THREAD_POOL_SIZE = 10;
+	
+	try {
+	    TServerTransport serverTransport = new TServerSocket(9090);
+	    TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverTransport);
+	    args.maxWorkerThreads(THREAD_POOL_SIZE);
+	    args.processor(processor);
+	    args.executorService(new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE));
+	    TServer server = new TThreadPoolServer(args);
+	    logger.info("Starting the TThreadPoolServer...");
+	    server.serve();
+	} catch (Exception e) {
+	    logger.warn(e.toString());
+	}
+    }
 }
 

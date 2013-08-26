@@ -30,33 +30,33 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 
 public class ClearNLPClient {
-  public static void main(String [] args) {
+	public static void main(String [] args) {
 
 
-    try {
-      TTransport transport;
-      transport = new TSocket("localhost", 9090);
-      transport.open();
-      TProtocol protocol = new  TBinaryProtocol(transport);
-      ClearNLP.Client client = new ClearNLP.Client(protocol);
+		try {
+			TTransport transport;
+			transport = new TSocket("localhost", 9090);
+			transport.open();
+			TProtocol protocol = new  TBinaryProtocol(transport);
+			ClearNLP.Client client = new ClearNLP.Client(protocol);
 
-      perform(client);
+			perform(client);
 
-      transport.close();
-    } catch (TException x) {
-      x.printStackTrace();
-    } 
-  }
+			transport.close();
+		} catch (TException x) {
+			x.printStackTrace();
+		} 
+	}
 
-  
 
-  private static void perform(ClearNLP.Client client) throws TException
-  {
 
-    for (String sentence : client.labelStringRaw("The man bit the dog , really ! And then jumped.")) {
-	    System.out.println(sentence);
-      System.out.println();  
-	
-    }
-  }  
+	private static void perform(ClearNLP.Client client) throws TException
+	{
+
+		for (String sentence : client.labelStringRaw("The man bit the dog , really ! And then jumped.")) {
+			System.out.println(sentence);
+			System.out.println();  
+
+		}
+	}  
 }

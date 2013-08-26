@@ -147,7 +147,7 @@ public class ThriftServer {
 				NLPDecode nlp = new NLPDecode();        
 
 				List<List<TDepNode> > result = new ArrayList< List<TDepNode> >(); 
-				for (List<String> tokens : segmenter.getSentences(in)){    
+				for (List<String> tokens : segmenter.getSentences(in)){
 					DEPTree tree = nlp.toDEPTree(tokens);
 					for (AbstractComponent component : components)
 						component.process(tree);
@@ -184,7 +184,7 @@ public class ThriftServer {
 
 			try {
 				List<String> result = new ArrayList<String>();
-				for (List<String> tokens : segmenter.getSentences(in)){    
+				for (List<String> tokens : segmenter.getSentences(in)){
 					DEPTree tree = nlp.toDEPTree(tokens);
 					for (AbstractComponent component : components) {
 						component.process(tree);
@@ -193,6 +193,7 @@ public class ThriftServer {
 				}
 				return result;
 			} catch (Exception e) {
+				//e.printStackTrace();
 				logger.warn(e.toString());
 				return null;    
 			}
@@ -232,7 +233,7 @@ public class ThriftServer {
 	}
 
 	public static void tThreadPoolServer(ClearNLP.Processor<ClearNLP.Iface> processor) {
-		int THREAD_POOL_SIZE = 10;
+		int THREAD_POOL_SIZE = 1;
 
 		try {
 			TServerTransport serverTransport = new TServerSocket(9090);

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.FileReader;
+import java.io.IOException;
 
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TServer.Args;
@@ -17,18 +18,17 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 
-import com.googlecode.clearnlp.component.AbstractComponent;
-import com.googlecode.clearnlp.dependency.DEPTree;
-import com.googlecode.clearnlp.engine.EngineGetter;
-import com.googlecode.clearnlp.nlp.NLPDecode;
-import com.googlecode.clearnlp.nlp.NLPLib;
-import com.googlecode.clearnlp.reader.AbstractReader;
-import com.googlecode.clearnlp.segmentation.AbstractSegmenter;
-import com.googlecode.clearnlp.tokenization.AbstractTokenizer;
-import com.googlecode.clearnlp.util.UTInput;
-import com.googlecode.clearnlp.util.UTOutput;
-import com.googlecode.clearnlp.dependency.DEPNode;
-import com.googlecode.clearnlp.dependency.DEPTree;
+import com.clearnlp.component.AbstractComponent;
+import com.clearnlp.dependency.DEPTree;
+import com.clearnlp.nlp.NLPGetter;
+import com.clearnlp.nlp.NLPMode;
+import com.clearnlp.reader.AbstractReader;
+import com.clearnlp.segmentation.AbstractSegmenter;
+import com.clearnlp.tokenization.AbstractTokenizer;
+import com.clearnlp.util.UTInput;
+import com.clearnlp.util.UTOutput;
+import com.clearnlp.dependency.DEPNode;
+import com.clearnlp.dependency.DEPTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,34 +46,29 @@ public class ThriftServer {
 	public static class ClearNLPHandler implements ClearNLP.Iface {
 
 		static private final String language = AbstractReader.LANG_EN;
+		static private final String modelType = "general-en";
 
 		static private AbstractTokenizer tokenizer;
-		static private AbstractComponent tagger; 
+		static private AbstractComponent tagger;
 		static private AbstractComponent analyzer;
-		static private AbstractComponent parser;   
-		static private AbstractComponent identifier;  
-		static private AbstractComponent classifier;  
-		static private AbstractComponent labeler;  
+		static private AbstractComponent parser;
+		static private AbstractComponent identifier;
+		static private AbstractComponent classifier;
+		static private AbstractComponent labeler;
 		static private AbstractComponent[] components;
+		static private AbstractSegmenter segmenter = NLPGetter.getSegmenter(language, tokenizer);
 		static private Logger logger = LoggerFactory.getLogger(ThriftServer.class);
 
 		public ClearNLPHandler () {
 			try {
-				InputStream dictStream      = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
-				InputStream morphStream     = DemoDecoder.class.getResourceAsStream("/dictionary-1.4.0.zip");
-				InputStream posModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pos-1.4.0.tgz"); 
-				InputStream depModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-dep-1.4.0.tgz");
-				InputStream predModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-pred-1.4.0.tgz");
-				InputStream roleModelStream = DemoDecoder.class.getResourceAsStream("/ontonotes-en-role-1.4.0.tgz");
-				InputStream srlModelStream  = DemoDecoder.class.getResourceAsStream("/ontonotes-en-srl-1.4.2.tgz");
-
-				tokenizer  = EngineGetter.getTokenizer(language, dictStream);
-				tagger     = EngineGetter.getComponent(posModelStream, language, NLPLib.MODE_POS);
-				analyzer   = EngineGetter.getComponent(morphStream, language, NLPLib.MODE_MORPH);
-				parser     = EngineGetter.getComponent(depModelStream, language, NLPLib.MODE_DEP);
-				identifier = EngineGetter.getComponent(predModelStream, language, NLPLib.MODE_PRED);
-				classifier = EngineGetter.getComponent(roleModelStream, language, NLPLib.MODE_ROLE);
-				labeler    = EngineGetter.getComponent(srlModelStream , language, NLPLib.MODE_SRL);
+				//AbstractSegmenter segmenter = NLPGetter.getSegmenter(s_language, NLPGetter.getTokenizer(s_language));
+				tokenizer  = NLPGetter.getTokenizer(language);
+				tagger     = NLPGetter.getComponent(modelType, language, NLPMode.MODE_POS);
+				analyzer   = NLPGetter.getComponent(modelType, language, NLPMode.MODE_MORPH);
+				parser     = NLPGetter.getComponent(modelType, language, NLPMode.MODE_DEP);
+				identifier = NLPGetter.getComponent(modelType, language, NLPMode.MODE_PRED);
+				classifier = NLPGetter.getComponent(modelType, language, NLPMode.MODE_ROLE);
+				labeler    = NLPGetter.getComponent(modelType, language, NLPMode.MODE_SRL);
 
 				AbstractComponent [] comps = {tagger, analyzer, parser, identifier, classifier, labeler};
 				components = comps;
@@ -82,7 +77,7 @@ public class ThriftServer {
 				//java.io.PrintWriter pw = new java.io.PrintWriter(sw);
 				//e.printStackTrace(pw);
 				//logger.warn(sw.getBuffer().toString());
-				logger.warn(e.toString());
+				logger.warn("Exception from ClearNLP Server", e);
 			}
 		}
 
@@ -109,17 +104,14 @@ public class ThriftServer {
 				List<String> r = labelCommon(in);
 				in.close();
 				return r;
-			} catch (Exception e) {
-				logger.warn(e.toString());
+			} catch (IOException e) {
+				logger.warn("Exception from ClearNLP Server", e);
 				return null;
 			}
 		}
 
 
 		private List<TDepNode> wrap2(List<DEPNode> tokens) {
-			/**
-			 * 
-			 */
 			ArrayList<TDepNode> result = new ArrayList<TDepNode> ();
 			for(DEPNode token: tokens){
 				String s =  token.toStringSRL();
@@ -143,20 +135,19 @@ public class ThriftServer {
 			try {
 				InputStream is = new ByteArrayInputStream(inputString.getBytes());
 				BufferedReader in = new BufferedReader(new InputStreamReader(is));
-				AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
-				NLPDecode nlp = new NLPDecode();        
+				AbstractSegmenter segmenter = NLPGetter.getSegmenter(language, tokenizer);
 
-				List<List<TDepNode> > result = new ArrayList< List<TDepNode> >(); 
+				List<List<TDepNode> > result = new ArrayList< List<TDepNode> >();
 				for (List<String> tokens : segmenter.getSentences(in)){
-					DEPTree tree = nlp.toDEPTree(tokens);
+					DEPTree tree = NLPGetter.toDEPTree(tokens);
 					for (AbstractComponent component : components)
 						component.process(tree);
 					result.add(wrap2(tree));
 				}
 				return result;
-			
+
 			} catch (Exception e) {
-				logger.warn(e.toString());
+				logger.warn("Exception from ClearNLP Server", e);
 				return null;
 			}
 
@@ -170,7 +161,7 @@ public class ThriftServer {
 				in.close();
 				return r;
 			} catch (Exception e) {
-				logger.warn(e.toString());
+				logger.warn("Exception from ClearNLP Server", e);
 				return null;
 			}
 		}
@@ -179,13 +170,12 @@ public class ThriftServer {
 
 		private List<String> labelCommon(BufferedReader in){
 
-			AbstractSegmenter segmenter = EngineGetter.getSegmenter(language, tokenizer);
-			NLPDecode nlp = new NLPDecode();
+			AbstractSegmenter segmenter = NLPGetter.getSegmenter(language, tokenizer);
 
 			try {
 				List<String> result = new ArrayList<String>();
 				for (List<String> tokens : segmenter.getSentences(in)){
-					DEPTree tree = nlp.toDEPTree(tokens);
+					DEPTree tree = NLPGetter.toDEPTree(tokens);
 					for (AbstractComponent component : components) {
 						component.process(tree);
 					}
@@ -194,8 +184,8 @@ public class ThriftServer {
 				return result;
 			} catch (Exception e) {
 				//e.printStackTrace();
-				logger.warn(e.toString());
-				return null;    
+				logger.warn("Exception from ClearNLP Server", e);
+				return null;
 			}
 		}
 	}
@@ -214,10 +204,10 @@ public class ThriftServer {
 					//simple(processor);
 					tThreadPoolServer(processor);
 				}
-			};      
+			};
 			new Thread(start).start();
 		} catch (Exception e) {
-			logger.warn(e.toString());
+			logger.warn("Exception from ClearNLP Server", e);
 		}
 	}
 
@@ -228,7 +218,7 @@ public class ThriftServer {
 			logger.info("Starting the simple server...");
 			server.serve();
 		} catch (Exception e) {
-			logger.warn(e.toString());
+			logger.warn("Exception from ClearNLP Server", e);
 		}
 	}
 
@@ -245,8 +235,7 @@ public class ThriftServer {
 			logger.info("Starting the TThreadPoolServer...");
 			server.serve();
 		} catch (Exception e) {
-			logger.warn(e.toString());
+			logger.warn("Exception from ClearNLP Server", e);
 		}
 	}
 }
-

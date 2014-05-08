@@ -1,40 +1,33 @@
 clear-nlp-packaged
 ==================
 
-A packaged client and server for Clear NLP 1.3.1. This software defines an interface for a client/server system that takes as input raw text and produces analyses based on tokenization, lemmatization, part-of-speech tagging and dependency parsing. 
+A packaged client and server for Clear NLP 2.0.2. This software defines an interface for a client/server system that takes as input raw text and produces analyses based on tokenization, lemmatization, part-of-speech tagging and dependency parsing.
 
-The software uses the Thrift framework to define and use a service that offers labeling for strings and files. The NLP functionality is from Jinho D. Choi's Clear NLP, which is Apache licensed and available on 
+The software uses the Thrift framework to define and use a service that offers labeling for strings and files. The NLP functionality is from Jinho D. Choi's Clear NLP, which is Apache licensed and available on
 
-https://code.google.com/p/clearnlp/
+http://clearnlp.com
 
-The first step is to download and build the software. The software is kept, for now, at 
+The first step is to download and build the software. The software is kept, for now, at
 
 https://github.com/cbrew/clear-nlp-packaged
 
 This version contains no ETS specific material, other than the use of org.ets.nlp as the Java package name.
 
-To build and run the server, you download from github, carry out an extra step to download the models, then build.
-
-The extra step, which is necessary because github now has size limits, is to invoke a script.
-
-	./get-models
-
-This script relies on wget, which downloads the models from Jinho Choi's bitbucket space. You will need to install wget 
-if you don't already have it. Once the models download, you are ready to build and run the server. First, do:
+To build and run the server, first, do:
 
 	mvn package
 
 which downloads the dependencies and builds a jar file :
 
-	target/uber-clearpak-1.4.0-SNAPSHOT.jar
+	target/uber-clearserver-1.0.jar
 
 This contains the code, and all the statistical models necessary to run the
 server. Next, run the server by invoking:
 
-	java -Xmx3g -jar target/uber-clearpak-1.4.0-SNAPSHOT.jar
+	java -Xmx3g -jar target/uber-clearserver-1.0.jar
 
 I do this in a screen session. It takes a while to load models, then sets
-up a server waiting for calls from clients. Thrift handles the server client interaction nicely. 
+up a server waiting for calls from clients. Thrift handles the server client interaction nicely.
 It works across machines, since that is the point of Thrift. My colleague Daehee Lee, at Nuance,
 has similar code for a large number of different parsers.
 

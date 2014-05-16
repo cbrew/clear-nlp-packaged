@@ -35,7 +35,9 @@ public class ClearNLPClient {
 
 		try {
 			TTransport transport;
-			transport = new TSocket("localhost", 9090);
+			int PORT = 9090;
+			if( args.length>0 )  PORT = Integer.parseInt( args[0] );            
+			transport = new TSocket("localhost", PORT);
 			transport.open();
 			TProtocol protocol = new  TBinaryProtocol(transport);
 			ClearNLP.Client client = new ClearNLP.Client(protocol);
@@ -45,6 +47,7 @@ public class ClearNLPClient {
 			transport.close();
 		} catch (TException x) {
 			x.printStackTrace();
+            System.out.println("Don't forget to supply port as a parameter if different from 9090:\n    java -cp uber-clearserver-1.0.jar ClearNLPClient 9091");
 		} 
 	}
 

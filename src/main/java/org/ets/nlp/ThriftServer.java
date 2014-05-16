@@ -42,6 +42,8 @@ import org.apache.thrift.transport.TServerTransport;
 
 public class ThriftServer {
 	private static Logger logger = LoggerFactory.getLogger(ThriftServer.class);
+    public static int SERVER_PORT = 9090;
+    public static int THREAD_POOL_SIZE = 1;
 
 	public static class ClearNLPHandler implements ClearNLP.Iface {
 
@@ -96,7 +98,7 @@ public class ThriftServer {
 		}
 
 
-		public List<String> labelStringRaw(String inputString){
+		public synchronized List<String> labelStringRaw(String inputString){
 
 			try {
 				InputStream is = new ByteArrayInputStream(inputString.getBytes());
@@ -130,7 +132,7 @@ public class ThriftServer {
 			return result;
 		}
 
-		public List<List<TDepNode>> labelString(String inputString){
+		public  synchronized List<List<TDepNode>> labelString(String inputString){
 
 			try {
 				InputStream is = new ByteArrayInputStream(inputString.getBytes());
@@ -153,7 +155,7 @@ public class ThriftServer {
 
 		}
 
-		public List<String> labelFile(String inputFile) {
+		public  synchronized List<String> labelFile(String inputFile) {
 
 			try {
 				BufferedReader in = UTInput.createBufferedFileReader(inputFile);
@@ -196,6 +198,11 @@ public class ThriftServer {
 
 	public static void main(String [] args) {
 		try {
+			if( args.length>0 )  SERVER_PORT = Integer.parseInt(args[0]);
+			if( args.length>1 )  THREAD_POOL_SIZE = Integer.parseInt(args[1]);
+			System.out.println("Initializing ClearNLP server on port "+SERVER_PORT+" with "+THREAD_POOL_SIZE+" threads");
+			System.out.println("   adjust server port/thead number by using start comnmand like:  java uber-clearserver-1.0.jar 9091 3 ");
+
 			handler = new ClearNLPHandler();
 			processor = new ClearNLP.Processor<ClearNLP.Iface>(handler);
 
@@ -213,7 +220,7 @@ public class ThriftServer {
 
 	public static void simple(ClearNLP.Processor<ClearNLP.Iface> processor) {
 		try {
-			TServerTransport serverTransport = new TServerSocket(9090);
+			TServerTransport serverTransport = new TServerSocket(SERVER_PORT);
 			TServer server = new TSimpleServer(new Args(serverTransport).processor(processor));
 			logger.info("Starting the simple server...");
 			server.serve();
@@ -223,10 +230,9 @@ public class ThriftServer {
 	}
 
 	public static void tThreadPoolServer(ClearNLP.Processor<ClearNLP.Iface> processor) {
-		int THREAD_POOL_SIZE = 1;
 
 		try {
-			TServerTransport serverTransport = new TServerSocket(9090);
+			TServerTransport serverTransport = new TServerSocket(SERVER_PORT);
 			TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverTransport);
 			args.maxWorkerThreads(THREAD_POOL_SIZE);
 			args.processor(processor);
